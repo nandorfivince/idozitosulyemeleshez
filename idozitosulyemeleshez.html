@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Időzítő</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+            font-size: 20px; /* Alapértelmezett betűméret növelése */
+        }
+
+        #timer-container {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        input[type="text"], button {
+            color: white;
+            background-color: #333;
+            border: none;
+            padding: 15px; /* Növeli a padding méretét */
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 24px; /* Input és gombok betűméretének növelése */
+        }
+
+        input[type="text"]:hover, button:hover {
+            color: blue;
+        }
+
+        #timer-display {
+            font-size: 48px; /* Időzítő kijelzőjének betűméretének jelentős növelése */
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="timer-container">
+    <input type="text" id="minutes-input" placeholder="Perc">
+    <input type="text" id="seconds-input" placeholder="Másodperc">
+    <button id="start-button">Indítás</button>
+    <button id="stop-button">Megállítás</button>
+    <button id="pause-button">Szünet</button>
+    <button id="reset-button">Újraindítás</button>
+    <div id="timer-display">00:00:00</div>
+</div>
+
+<script>
+    let timer = null;
+    let pauseTime = 0;
+
+    function updateTimeDisplay(seconds) {
+        let hours = Math.floor(seconds / 3600);
+        let minutes = Math.floor((seconds - (hours * 3600)) / 60);
+        let remainingSeconds = seconds - (hours * 3600) - (minutes * 60);
+
+        function pad(time) {
+            return time < 10 ? '0' + time : time;
+        }
+
+        document.getElementById('timer-display').innerHTML = pad(hours) + ":" + pad(minutes) + ":" + pad(remainingSeconds);
+    }
+
+    document.getElementById('start-button').addEventListener('click', function() {
+        if (timer !== null) {
+            clearInterval(timer);
+        }
+        let minutes = parseInt(document.getElementById('minutes-input').value) || 0;
+        let seconds = parseInt(document.getElementById('seconds-input').value) || 0;
+        let totalTime = (minutes * 60) + seconds;
+        pauseTime = pauseTime === 0 ? totalTime : pauseTime;
+
+        timer = setInterval(function() {
+            if (pauseTime <= 0) {
+                clearInterval(timer);
+                updateTimeDisplay(0);
+                pauseTime = 0;
+                return;
+            }
+            pauseTime--;
+            updateTimeDisplay(pauseTime);
+        }, 1000);
+    });
+
+    document.getElementById('stop-button').addEventListener('click', function() {
+        clearInterval(timer);
+        timer = null;
+        pauseTime = 0;
+        updateTimeDisplay(0);
+    });
+
+    document.getElementById('pause-button').addEventListener('click', function() {
+        clearInterval(timer);
+        timer = null;
+    });
+
+    document.getElementById('reset-button').addEventListener('click', function() {
+        clearInterval(timer);
+        timer = null;
+        pauseTime = 0;
+        document.getElementById('minutes-input').value = "";
+        document.getElementById('seconds-input').value = "";
+        updateTimeDisplay(0);
+    });
+</script>
+</body>
+</html>
